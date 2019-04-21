@@ -1,5 +1,11 @@
 # tetris game use pygame lib
-# support
+install pygame
+
+
+`
+pip install pygame
+`
+# playing
 - human play with computer
 - computer play with computer
 
