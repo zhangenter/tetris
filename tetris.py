@@ -47,9 +47,27 @@ class Matrix(object):
             self.set_val(x+xdiff,y+ydiff, 1)
 
     def do_clear(self):
+        clear_num = 0
         for i in range(self.rows-1,-1,-1):
             if sum(self.data[self.cols*i:self.cols*(i+1)])==self.cols:
                 self.data[self.cols:self.cols*(i+1)]=self.data[0:self.cols*i]
+                clear_num+=1
+        return clear_num
+
+    def get_empty_col(self):
+        miny_arr=[]
+        for x in range(self.cols):
+            miny=19
+            for y in range(self.rows):
+                miny=y
+                if self.get_val(x,y) == 1:break
+            miny_arr.append(miny)
+        empty_arr=[]
+        if miny_arr[1] - miny_arr[0] > 2: empty_arr.append((self.cols,miny_arr[1] - miny_arr[0]))
+        if miny_arr[self.cols-2] - miny_arr[self.cols-1] > 2: empty_arr.append((miny_arr[self.cols-2] - miny_arr[self.cols-1],self.cols))
+        for x in range(1,self.cols-1):
+            if miny_arr[x-1]-miny_arr[x]>2 or miny_arr[x+1]-miny_arr[x]>2: empty_arr.append((miny_arr[x-1]-miny_arr[x],miny_arr[x+1]-miny_arr[x]))
+        return empty_arr
 
     def print_matrix(self):
         for i in range(self.rows):
@@ -75,6 +93,14 @@ class AIPlayer(Player):
     def __init__(self):
         super(Player, self).__init__()
         self.ctl_ticks = pygame.time.get_ticks() + self.ai_diff_ticks
+
+    def get_cost_of_emptycol(self, empty_arr):
+        cost = 0
+        for l,r in empty_arr:
+            if l>2 and r>2: cost += (l+r)*2
+            elif l>2: cost += l
+            else: cost += r
+        return cost
 
     def cal_best_arr(self, panel):
         matrix = panel.get_rect_matrix()
@@ -113,7 +139,10 @@ class AIPlayer(Player):
                 # clone matrix and fill new block to calculate holes
                 clone_matrix = matrix.clone()
                 clone_matrix.fill_block(center_shape, xdiff=xdiff, ydiff=max_yindex)
-                clone_matrix.do_clear()
+                clear_num = clone_matrix.do_clear()
+                empty_arr = clone_matrix.get_empty_col()
+                score -= self.get_cost_of_emptycol(empty_arr)
+                score += clear_num * 5
                 score -= clone_matrix.get_hole_number() * COL_COUNT
 
                 if score > max_score: 
