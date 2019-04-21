@@ -99,8 +99,9 @@ class AIPlayer(Player):
     auto_mode=True
     ai_diff_ticks = 100 #timespan between two controls
     
-    def __init__(self):
+    def __init__(self, ai_diff_ticks=100):
         super(Player, self).__init__()
+        self.ai_diff_ticks=ai_diff_ticks
         self.ctl_ticks = pygame.time.get_ticks() + self.ai_diff_ticks
 
     def get_cost_of_emptycol(self, empty_arr):
@@ -185,21 +186,47 @@ class RectInfo(object):
         self.y = y
         self.color = color
 
-class HintBox(object):
+class BlockManage(object):
+    pnum=1
+    blocks = []
+    def __init__(self,pnum):
+        self.pnum=pnum
+        self.blocks=[[] for i in range(self.pnum)]
+
+    def get_block(self, pid=0):
+        if len(self.blocks[pid]) == 0:
+            block = create_block()
+            for arr in self.blocks:
+                arr.append(pickle.loads(pickle.dumps(block)))
+        return self.blocks[pid].pop(0)
+
+class VirtualHintBox(object):
+    pid = 0
+    block_manage=None
     next_block=None
-    def __init__(self, bg, block_size, position):
-        self._bg=bg;
-        self._x,self._y,self._width,self._height=position
-        self._block_size=block_size
-        self._bgcolor=[0,0,0]
+    def __init__(self, pid, block_manage):
+        print pid
+        self.pid=pid
+        self.block_manage=block_manage
 
     def take_block(self):
         block = self.next_block
         if block is None: # make first block
-            block = create_block()
+            block = block_manage.get_block(self.pid)
     
-        self.next_block = create_block()
+        self.next_block = block_manage.get_block(self.pid)
         return block
+
+    def paint(self):
+        pass
+
+class HintBox(VirtualHintBox):
+    def __init__(self, bg, block_size, position, block_manage):
+        super(VirtualHintBox, self).__init__()
+        self._bg=bg;
+        self._x,self._y,self._width,self._height=position
+        self._block_size=block_size
+        self._bgcolor=[0,0,0]
 
     def paint(self):
         mid_x=self._x+self._width/2
@@ -242,15 +269,31 @@ class ScoreBox(object):
         myfont = pygame.font.Font(None,36)
         white = 255,255,255
         textImage = myfont.render('High: %06d'%(self.high_score), True, white)
-        self._bg.blit(textImage, (self._x,self._y))
+        self._bg.blit(textImage, (self._x,self._y-10))
         textImage = myfont.render('Score:%06d'%(self.total_score), True, white)
-        self._bg.blit(textImage, (self._x,self._y+40))
+        self._bg.blit(textImage, (self._x,self._y+20))
 
     def add_score(self, score):
         self.total_score += score
         if self.total_score > self.high_score:
             self.high_score=self.total_score
             pickle.dump(self.high_score, open(self.db_file,'wb+'))
+
+class VirtualScoreBox(object):
+    total_score = 0
+    def __init__(self, bg, position):
+        self._bg=bg;
+        self._x,self._y,self._width,self._height=position
+        self._bgcolor=[0,0,0]
+
+    def paint(self):
+        myfont = pygame.font.Font(None,22)
+        white = 255,255,255
+        textImage = myfont.render('Player2 Score:%06d'%(self.total_score), True, white)
+        self._bg.blit(textImage, (self._x,self._y))
+
+    def add_score(self, score):
+        self.total_score += score
 
 class Panel(object): 
     block_id=0
@@ -263,6 +306,9 @@ class Panel(object):
         self._x,self._y,self._width,self._height=position
         self._block_size=block_size
         self._bgcolor=[0,0,0]
+        self.block_id=0
+        self.rect_arr=[]
+        self.moving_block=None
     
     def get_rect_matrix(self):
         matrix = Matrix(ROW_COUNT, COL_COUNT)
@@ -271,8 +317,10 @@ class Panel(object):
         return matrix
 
     def add_block(self,block):
+        print block.get_rect_arr()
         for x,y in block.get_rect_arr():
             self.rect_arr.append(RectInfo(x,y, block.color))
+        print len(self.rect_arr)
 
     def create_move_block(self):
         self.block_id+=1
@@ -358,11 +406,15 @@ class Panel(object):
             pygame.draw.line(self._bg,rect_info.color,[self._x+x*bz+bz/2,self._y+y*bz],[self._x+x*bz+bz/2,self._y+(y+1)*bz],bz)
             pygame.draw.rect(self._bg,[255,255,255],[self._x+x*bz,self._y+y*bz,bz+1,bz+1],1)
        
-        if self.move_block:
+        if self.moving_block:
             for rect in self.moving_block.get_rect_arr():
                 x,y=rect
                 pygame.draw.line(self._bg,self.moving_block.color,[self._x+x*bz+bz/2,self._y+y*bz],[self._x+x*bz+bz/2,self._y+(y+1)*bz],bz)
                 pygame.draw.rect(self._bg,[255,255,255],[self._x+x*bz,self._y+y*bz,bz+1,bz+1],1)
+
+
+        self.score_box.paint() 
+        self.hint_box.paint() 
 
 class Block(object):
     sx=0
@@ -519,28 +571,43 @@ def create_block():
     elif n>=11 and n<=14: return JBlock(n=n-11)
     else: return TBlock(n=n-15)
 
+block_manage = BlockManage(2) # two players
 def run():
     pygame.init()
+    addition_width = 160
     space=30
     main_block_size=30
     main_panel_width=main_block_size*COL_COUNT
     main_panel_height=main_block_size*ROW_COUNT
     screencaption = pygame.display.set_caption('Tetris')
-    screen = pygame.display.set_mode((main_panel_width+160+space*3,main_panel_height+space*2)) 
+    screen = pygame.display.set_mode((main_panel_width+addition_width+space*3,main_panel_height+space*2)) 
     main_panel=Panel(screen,main_block_size,[space,space,main_panel_width,main_panel_height])
-    hint_box=HintBox(screen,main_block_size,[main_panel_width+space+space,space,160,160])
-    score_box=ScoreBox(screen,main_block_size,[main_panel_width+space+space,160+space*2,160,160])
-    
+    hint_box=HintBox(screen,main_block_size,[main_panel_width+space+space,space,addition_width,addition_width],block_manage)
+    score_box=ScoreBox(screen,main_block_size,[main_panel_width+space+space,addition_width+space*2,addition_width,addition_width])
+
     main_panel.hint_box=hint_box
     main_panel.score_box=score_box
 
     pygame.key.set_repeat(200, 30)
     main_panel.create_move_block()
 
+    battle_panel_width=160
+    battle_block_width=battle_panel_width/COL_COUNT
+    battle_panel_height=battle_block_width*ROW_COUNT
+    battle_panel_x = main_panel_width+space+space+(addition_width-battle_panel_width)
+    battle_panel_y = main_panel_height+space-battle_panel_height
+    battle_panel=Panel(screen,battle_block_width,[battle_panel_x,battle_panel_y,battle_panel_width,battle_panel_height])
+    battle_panel.hint_box=VirtualHintBox(1,block_manage)
+    battle_panel.score_box=VirtualScoreBox(screen,[battle_panel_x,battle_panel_y-16,addition_width,16])
+    battle_panel.create_move_block()
+
+
     diff_ticks = 300 
     ticks = pygame.time.get_ticks() + diff_ticks
 
-    player = AIPlayer()
+    #player1 = HumanPlayer()
+    player1 = AIPlayer(ai_diff_ticks=150)
+    player2 = AIPlayer(ai_diff_ticks=350)
 
     pause=0
     game_state = 1 # game status 1.normal 2.gameover
@@ -553,7 +620,7 @@ def run():
                 if event.key==97: pause=1-pause # press a to pause
                 if event.key==112: # for debug where press p
                     main_panel.get_rect_matrix().print_matrix()
-            if player.auto_mode:continue
+            if player1.auto_mode:continue
             if event.type == KEYDOWN:
                 if event.key == K_LEFT: main_panel.control_block(-1,0)
                 if event.key == K_RIGHT: main_panel.control_block(1,0)
@@ -567,8 +634,7 @@ def run():
        
         screen.fill((100,100,100)) # make background gray
         main_panel.paint() 
-        hint_box.paint() 
-        score_box.paint() 
+        battle_panel.paint()
 
         if game_state == 2:
             myfont = pygame.font.Font(None,30)
@@ -579,9 +645,12 @@ def run():
         pygame.display.update() 
 
         if pause==1: continue
-        if game_state == 1: player.run(main_panel)
+        if game_state == 1: 
+            player1.run(main_panel)
+            player2.run(battle_panel)
         if game_state == 1 and pygame.time.get_ticks() >= ticks:
             ticks+=diff_ticks
             if main_panel.move_block()==9: game_state = 2 # gameover
+            battle_panel.move_block()
 
 run()
