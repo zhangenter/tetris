@@ -46,6 +46,11 @@ class Matrix(object):
         for x,y in rect_arr:
             self.set_val(x+xdiff,y+ydiff, 1)
 
+    def do_clear(self):
+        for i in range(self.rows-1,-1,-1):
+            if sum(self.data[self.cols*i:self.cols*(i+1)])==self.cols:
+                self.data[self.cols:self.cols*(i+1)]=self.data[0:self.cols*i]
+
     def print_matrix(self):
         for i in range(self.rows):
             print self.data[self.cols*i:self.cols*(i+1)]
@@ -108,6 +113,7 @@ class AIPlayer(Player):
                 # clone matrix and fill new block to calculate holes
                 clone_matrix = matrix.clone()
                 clone_matrix.fill_block(center_shape, xdiff=xdiff, ydiff=max_yindex)
+                clone_matrix.do_clear()
                 score -= clone_matrix.get_hole_number() * COL_COUNT
 
                 if score > max_score: 
