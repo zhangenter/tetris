@@ -30,6 +30,15 @@ class Matrix(object):
             if self.get_val(x+xdiff,y+ydiff) == 1: return True
         return False
 
+    def get_block_above_hole(self):
+        blocks=0
+        for x in range(0,self.cols):
+            for y in range(1,self.rows):
+                if self.get_val(x,y) == 0 and self.get_val(x,y-1) == 1: 
+                    blocks += sum(self.data[x:(y*self.cols+x):self.cols])
+
+        return blocks
+
     def get_hole_number(self):
         hole_num=0
         for x in range(0,self.cols):
@@ -140,6 +149,7 @@ class AIPlayer(Player):
                 clone_matrix = matrix.clone()
                 clone_matrix.fill_block(center_shape, xdiff=xdiff, ydiff=max_yindex)
                 clear_num = clone_matrix.do_clear()
+                score -= clone_matrix.get_block_above_hole()
                 empty_arr = clone_matrix.get_empty_col()
                 score -= self.get_cost_of_emptycol(empty_arr)
                 score += clear_num * 5
