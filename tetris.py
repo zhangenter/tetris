@@ -296,6 +296,7 @@ class VirtualScoreBox(object):
         self.total_score += score
 
 class Panel(object): 
+    attack_num=0
     block_id=0
     rect_arr=[] 
     moving_block=None 
@@ -394,6 +395,24 @@ class Panel(object):
             score = SCORE_MAP[clear_num-1]
             self.score_box.add_score(score)
 
+    def get_attach_num(self):
+        if self.score_box.total_score /1000 > self.attack_num:
+            self.attack_num+=1
+            return 1
+        else:
+            return 0
+
+    def add_hinder(self):
+        hinder_lines=2
+        for tmp in self.rect_arr:
+            tmp.y-=hinder_lines
+        for y in range(hinder_lines):
+            arr=range(10)
+            for i in range(5):
+                n = random.randint(0,len(arr)-1)
+                arr.pop(n)
+            for x in arr:
+                self.rect_arr.append(RectInfo(x,19-y,[0,0,255]))
 
     def paint(self):
         mid_x=self._x+self._width/2
@@ -605,8 +624,8 @@ def run():
     diff_ticks = 300 
     ticks = pygame.time.get_ticks() + diff_ticks
 
-    #player1 = HumanPlayer()
-    player1 = AIPlayer(ai_diff_ticks=150)
+    player1 = HumanPlayer()
+    #player1 = AIPlayer(ai_diff_ticks=1)
     player2 = AIPlayer(ai_diff_ticks=350)
 
     pause=0
@@ -631,6 +650,7 @@ def run():
                     while flag==1: 
                         flag = main_panel.move_block()
                     if flag == 9: game_state = 2
+                    if main_panel.get_attach_num()>0: battle_panel.add_hinder()
        
         screen.fill((100,100,100)) # make background gray
         main_panel.paint() 
@@ -640,6 +660,11 @@ def run():
             myfont = pygame.font.Font(None,30)
             white = 255,255,255
             textImage = myfont.render("Game over", True, white)
+            screen.blit(textImage, (160,190))
+        if game_state == 3:
+            myfont = pygame.font.Font(None,30)
+            white = 255,255,255
+            textImage = myfont.render("Player1 win", True, white)
             screen.blit(textImage, (160,190))
 
         pygame.display.update() 
@@ -651,6 +676,8 @@ def run():
         if game_state == 1 and pygame.time.get_ticks() >= ticks:
             ticks+=diff_ticks
             if main_panel.move_block()==9: game_state = 2 # gameover
-            battle_panel.move_block()
+            if main_panel.get_attach_num()>0: battle_panel.add_hinder()
+            if battle_panel.move_block()==9: game_state = 3 # gameover
+            if battle_panel.get_attach_num()>0: main_panel.add_hinder()
 
 run()
