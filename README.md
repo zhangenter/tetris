@@ -1,4 +1,5 @@
-# a tetris code witch support
+# tetris game use pygame lib
+# support
 - human play with computer
 - computer play with computer
 
