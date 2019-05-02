@@ -67,7 +67,8 @@ class Main():
         self.image = pygame.transform.scale(self.image, (self.image_width, image_height))
 
     def reset_display_text(self):
-        screencaption = pygame.display.set_caption(LanguageLib.instance().get_text('tetris'))
+        caption = LanguageLib.instance().get_text('tetris')
+        screencaption = pygame.display.set_caption(caption.encode('utf-8'))
         for i in range(len(self.btn_group.btn_list)):
             if i >= len(self.btn_text_arr): break
             self.btn_group.btn_list[i].text = LanguageLib.instance().get_text(self.btn_text_arr[i])

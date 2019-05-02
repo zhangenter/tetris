@@ -14,7 +14,8 @@ def start_play():
     main_block_size=MAIN_BLOCK_SIZE
     main_panel_width = main_block_size * COL_COUNT
     main_panel_height = main_block_size * ROW_COUNT
-    screencaption = pygame.display.set_caption(LanguageLib.instance().get_text('battle mode'))
+    caption = LanguageLib.instance().get_text('battle mode')
+    screencaption = pygame.display.set_caption(caption.encode('utf-8'))
     screen = pygame.display.set_mode((main_panel_width + addition_width + space * 3, main_panel_height + space * 2))
     main_panel = Panel(screen, main_block_size, [space, space, main_panel_width, main_panel_height])
     hint_box = HintBox(screen, main_block_size,
