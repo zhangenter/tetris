@@ -20,7 +20,6 @@ def do_click_quit(btn):
 class Main():
     def __init__(self):
         pygame.init()
-        
         addition_width = ADDITION_WIDTH
         space=SPACE
         main_block_size=MAIN_BLOCK_SIZE
