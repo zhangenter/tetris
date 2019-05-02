@@ -14,7 +14,7 @@ def start_play():
     main_block_size=MAIN_BLOCK_SIZE
     main_panel_width = main_block_size * COL_COUNT
     main_panel_height = main_block_size * ROW_COUNT
-    screencaption = pygame.display.set_caption('Tetris')
+    screencaption = pygame.display.set_caption(u'人机对战')
     screen = pygame.display.set_mode((main_panel_width + addition_width + space * 3, main_panel_height + space * 2))
     main_panel = Panel(screen, main_block_size, [space, space, main_panel_width, main_panel_height])
     hint_box = HintBox(screen, main_block_size,

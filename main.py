@@ -3,6 +3,7 @@ import pygame
 from globals import *
 from bf_button import BFButtonGroup
 
+print pygame.font.get_fonts()
 def start_single_game(btn):
     from single_tetris import start_play
     start_play()
@@ -39,9 +40,9 @@ class Main():
         self.screen = pygame.display.set_mode((self.form_width,self.form_height))
 
         self.btn_group = BFButtonGroup()
-        self.btn_group.make_button(self.screen, (btn_left, btn_y, btn_width, btn_height), text='Single', click=start_single_game)
-        self.btn_group.make_button(self.screen, (btn_left, btn_y + btn_height + btn_space, btn_width, btn_height), text='Play with AI', click=start_battle_game)
-        self.btn_group.make_button(self.screen, (btn_left, btn_y + (btn_height + btn_space) * 2, btn_width, btn_height), text='Quit', click=do_click_quit)
+        self.btn_group.make_button(self.screen, (btn_left, btn_y, btn_width, btn_height), text=u'单人游戏', click=start_single_game)
+        self.btn_group.make_button(self.screen, (btn_left, btn_y + btn_height + btn_space, btn_width, btn_height), text=u'人机对战', click=start_battle_game)
+        self.btn_group.make_button(self.screen, (btn_left, btn_y + (btn_height + btn_space) * 2, btn_width, btn_height), text=u'退出', click=do_click_quit)
 
         self.image = pygame.image.load('main.jpg') # 343 * 382
         image_height = btn_y - space * 2
@@ -50,7 +51,7 @@ class Main():
 
     def do_loop(self):
         pygame.init()
-        screencaption = pygame.display.set_caption('Tetris')
+        screencaption = pygame.display.set_caption(u'俄罗斯方块')
         self.screen = pygame.display.set_mode((self.form_width,self.form_height))
         self.btn_group.set_screen(self.screen)
         while True:
