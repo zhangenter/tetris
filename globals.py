@@ -1,8 +1,11 @@
 # -*- coding=utf-8 -*-
+import sys
 import threading
 from ConfigParser import ConfigParser
 import platform
 import pygame
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 LANGUAGE_CONF_FILE = 'language.conf'
 
@@ -47,7 +50,6 @@ class LanguageConfigParser(object):
         dic = {}
         for word in words:
             dic[word] = self.conf.get(language, word).decode('utf-8')
-        print dic
         return dic
 
     def save(self):
