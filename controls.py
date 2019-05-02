@@ -28,7 +28,7 @@ class VirtualHintBox(object):
 
 class HintBox(VirtualHintBox):
     def __init__(self, bg, block_size, position, block_manage):
-        super(VirtualHintBox, self).__init__()
+        super(HintBox, self).__init__(0, block_manage)
         self._bg = bg;
         self._x, self._y, self._width, self._height = position
         self._block_size = block_size
@@ -78,11 +78,11 @@ class ScoreBox(object):
         if os.path.exists(self.db_file): self.high_score = pickle.load(open(self.db_file, 'rb'))
 
     def paint(self):
-        myfont = pygame.font.Font(None, 36)
+        myfont = get_user_font(24)
         white = 255, 255, 255
-        textImage = myfont.render('High: %06d' % (self.high_score), True, white)
+        textImage = myfont.render(LanguageLib.instance().get_text('high') + ': %06d' % (self.high_score), True, white)
         self._bg.blit(textImage, (self._x, self._y - 10))
-        textImage = myfont.render('Score:%06d' % (self.total_score), True, white)
+        textImage = myfont.render(LanguageLib.instance().get_text('score') + ':%06d' % (self.total_score), True, white)
         self._bg.blit(textImage, (self._x, self._y + 20))
 
     def add_score(self, score):
@@ -101,9 +101,9 @@ class VirtualScoreBox(object):
         self._bgcolor = [0, 0, 0]
 
     def paint(self):
-        myfont = pygame.font.Font(None, 22)
+        myfont = get_user_font(16)
         white = 255, 255, 255
-        textImage = myfont.render('Player2 Score:%06d' % (self.total_score), True, white)
+        textImage = myfont.render(LanguageLib.instance().get_text('player2 score') + ':%06d' % (self.total_score), True, white)
         self._bg.blit(textImage, (self._x, self._y))
 
     def add_score(self, score):
@@ -232,7 +232,7 @@ class Panel(object):
     def paint(self):
         mid_x = self._x + self._width / 2
         pygame.draw.line(self._bg, self._bgcolor, [mid_x, self._y], [mid_x, self._y + self._height],
-                         self._width)  # ��һ�����߶�����䱳��
+                         self._width)
 
         bz = self._block_size
         for rect_info in self.rect_arr:

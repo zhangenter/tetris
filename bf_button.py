@@ -2,6 +2,7 @@
 import threading
 import pygame
 from pygame.locals import MOUSEBUTTONDOWN
+from globals import get_user_font
 
 class BFControlId(object):
     _instance_lock = threading.Lock()
@@ -18,6 +19,14 @@ class BFControlId(object):
         self.id += 1
         return self.id
 
+    @property
+    def click_id(self):
+        return self._click_id
+
+    @click_id.setter
+    def click_id(self, value):
+        self._click_id = value
+
 CLICK_EFFECT_TIME = 100
 class BFButton(object):
     def __init__(self, parent, rect, text='Button', click=None):
@@ -33,17 +42,18 @@ class BFButton(object):
         self._text = text
         self._click = click
         self._visible = True
+        self.tag = None
+        self._font_size = 28
         self.init_font()
 
     def init_font(self):
         #font = pygame.font.SysFont('SimHei', 28)
-        font = pygame.font.Font(u'syht.otf', 28)
+        font = get_user_font(self._font_size)
         white = 100, 100, 100
         self.textImage = font.render(self._text, True, white)
         w, h = self.textImage.get_size()
         self._tx = (self.width - w) / 2
         self._ty = (self.height - h) / 2
-
 
     @property
     def text(self):
@@ -52,6 +62,15 @@ class BFButton(object):
     @text.setter
     def text(self, value):
         self._text = value
+        self.init_font()
+
+    @property
+    def font_size(self):
+        return self._font_size
+
+    @font_size.setter
+    def font_size(self, value):
+        self._font_size = value
         self.init_font()
 
     @property
@@ -71,7 +90,7 @@ class BFButton(object):
         self._visible = value
 
     def update(self, event):
-        if self.in_click and event.type == self.click_event_id:
+        if self.in_click and event.type == self.click_event_id and BFControlId().instance().click_id == self.ctl_id:
             self.in_click = False
             if self._click: self._click(self)
             self.click_event_id = -1
@@ -85,7 +104,8 @@ class BFButton(object):
                 if pressed_array[0]:
                     self.in_click = True
                     self.click_loss_time = pygame.time.get_ticks() + CLICK_EFFECT_TIME
-                    self.click_event_id = pygame.USEREVENT+self.ctl_id
+                    self.click_event_id = pygame.USEREVENT+1
+                    BFControlId().instance().click_id = self.ctl_id
                     pygame.time.set_timer(self.click_event_id,CLICK_EFFECT_TIME-10)
         else:
             self.is_hover = False

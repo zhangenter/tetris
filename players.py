@@ -12,7 +12,7 @@ class Player(object):
 
 class HumanPlayer(Player):
     def __init__(self):
-        super(Player, self).__init__()
+        super(HumanPlayer, self).__init__()
 
 class AIPlayer(Player):
     cal_block_id = -1
@@ -22,7 +22,7 @@ class AIPlayer(Player):
     level = None
 
     def __init__(self, level=None, ai_diff_ticks=100):
-        super(Player, self).__init__()
+        super(AIPlayer, self).__init__()
         self.ai_diff_ticks = ai_diff_ticks
         self.level = level
         if level is not None:

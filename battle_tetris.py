@@ -14,7 +14,7 @@ def start_play():
     main_block_size=MAIN_BLOCK_SIZE
     main_panel_width = main_block_size * COL_COUNT
     main_panel_height = main_block_size * ROW_COUNT
-    screencaption = pygame.display.set_caption(u'人机对战')
+    screencaption = pygame.display.set_caption(LanguageLib.instance().get_text('battle mode'))
     screen = pygame.display.set_mode((main_panel_width + addition_width + space * 3, main_panel_height + space * 2))
     main_panel = Panel(screen, main_block_size, [space, space, main_panel_width, main_panel_height])
     hint_box = HintBox(screen, main_block_size,
@@ -46,6 +46,10 @@ def start_play():
     # player1 = AIPlayer(ai_diff_ticks=100)
     player2 = AIPlayer(level=5)
 
+    myfont = get_user_font(30)
+    white = 255, 255, 255
+    game_over_textImage = myfont.render(LanguageLib.instance().get_text("game over"), True, white)
+    player1_win_textImage = myfont.render(LanguageLib.instance().get_text("player1 win"), True, white)
     pause = 0
     game_state = 1  # game status 1.normal 2.gameover
     while True:
@@ -75,15 +79,9 @@ def start_play():
         battle_panel.paint()
 
         if game_state == 2:
-            myfont = pygame.font.Font(None, 30)
-            white = 255, 255, 255
-            textImage = myfont.render("Game over", True, white)
-            screen.blit(textImage, (160, 190))
+            screen.blit(game_over_textImage, (160, 190))
         if game_state == 3:
-            myfont = pygame.font.Font(None, 30)
-            white = 255, 255, 255
-            textImage = myfont.render("Player1 win", True, white)
-            screen.blit(textImage, (160, 190))
+            screen.blit(player1_win_textImage, (160, 190))
 
         pygame.display.update()
 
