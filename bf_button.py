@@ -71,6 +71,7 @@ class BFButton(object):
 
     def update(self, event):
         if self.in_click and event.type == self.click_event_id:
+            self.in_click = False
             if self._click: self._click(self)
             self.click_event_id = -1
             return

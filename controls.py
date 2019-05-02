@@ -134,7 +134,7 @@ class Panel(object):
         return matrix
 
     def add_block(self, block):
-        print block.get_rect_arr()
+        #print block.get_rect_arr()
         for x, y in block.get_rect_arr():
             self.rect_arr.append(RectInfo(x, y, block.color))
         #print len(self.rect_arr)
