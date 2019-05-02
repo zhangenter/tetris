@@ -3,7 +3,6 @@ import pygame
 from globals import *
 from bf_button import BFButtonGroup
 
-print pygame.font.get_fonts()
 def start_single_game(btn):
     from single_tetris import start_play
     start_play()

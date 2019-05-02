@@ -36,8 +36,8 @@ class BFButton(object):
         self.init_font()
 
     def init_font(self):
-        font = pygame.font.SysFont('SimHei', 28)
-        #font = pygame.font.Font('楷体', 28)
+        #font = pygame.font.SysFont('SimHei', 28)
+        font = pygame.font.Font(u'syht.otf', 28)
         white = 100, 100, 100
         self.textImage = font.render(self._text, True, white)
         w, h = self.textImage.get_size()
