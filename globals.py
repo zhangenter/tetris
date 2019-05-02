@@ -46,7 +46,8 @@ class LanguageConfigParser(object):
         words = self.conf.options(language)
         dic = {}
         for word in words:
-            dic[word] = self.conf.get(language, word).decode('utf-8')
+            dic[word] = self.conf.get(language, word) #.decode('utf-8')
+        print dic
         return dic
 
     def save(self):
